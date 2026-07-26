@@ -1,0 +1,21 @@
+name: Update Credly Badges
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-badges:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pemtajo/badge-readme@main
+        with:
+          CREDLY_USER: agnieszka-pasieka
+          NUMBER_LAST_BADGES: 10

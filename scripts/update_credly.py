@@ -90,49 +90,48 @@ def get_badges():
 
 def create_badge_grid(badges):
 
-    cards = []
+    rows = []
 
     for badge in badges:
 
-        image = badge.get("image") or badge.get("image_url")
-        name = badge.get("name", "Certification")
-        issuer = badge.get("issuer", "")
-        url = badge.get("url", "#")
+        rows.append(
+            f"""
+<td align="center" width="200">
 
-        cards.append(f"""
-<div style="
-display:inline-block;
-vertical-align:top;
-width:30%;
-min-width:220px;
-margin:10px;
-padding:15px;
-text-align:center;
-">
+<a href="{badge['url']}">
 
-<a href="{url}">
-
-<img 
-src="{image}"
-width="120"
-height="120"
-alt="{name}"
->
+<img src="{badge['image']}" width="120" height="120">
 
 <br>
 
-<strong>{name}</strong>
+<b>{badge['name']}</b>
 
 <br>
 
-<small>{issuer}</small>
+<sub>{badge['issuer']}</sub>
 
 </a>
 
-</div>
-""")
+</td>
+"""
+        )
 
-    return "\n".join(cards)
+    # 4 badges per row
+    table = ["<table>", "<tr>"]
+
+    for i, card in enumerate(rows, start=1):
+
+        table.append(card)
+
+        if i % 4 == 0:
+            table.append("</tr><tr>")
+
+    table.extend([
+        "</tr>",
+        "</table>"
+    ])
+
+    return "\n".join(table)
 
 
 def update_readme(content):

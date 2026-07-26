@@ -36,6 +36,18 @@ def extract_badges():
 
         page.wait_for_timeout(10000)
 
+        print("Saving debug files...")
+
+        with open("credly-page.html", "w", encoding="utf-8") as f:
+            f.write(page.content())
+        
+        page.screenshot(
+            path="credly-page.png",
+            full_page=True
+        )
+        
+        print("Debug files saved")
+
         # DEBUG
         html = page.content()
         

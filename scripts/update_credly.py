@@ -74,31 +74,31 @@ def extract_badges():
         for i in range(cards.count()):
 
             card = cards.nth(i)
-
+        
             href = card.get_attribute("href")
-
+        
             if not href:
                 continue
-                
-            if "badge" not in href.lower():
+        
+            if "/badges/" not in href:
                 continue
-                
+        
+            # Try to find image anywhere inside the badge link
             img = card.locator("img").first
-
-            if img.count() == 0:
-                continue
-
-            image = img.get_attribute("src")
-
-            title = (
-                img.get_attribute("alt")
-                or card.inner_text()
-                or "Certification"
-            )
-
+        
+            image = None
+            if img.count() > 0:
+                image = img.get_attribute("src")
+        
+            # Try to extract visible text
+            text = card.inner_text().strip()
+        
+            if not text:
+                text = "Certification"
+        
             badges.append({
-                "name": title.strip(),
-                "image": image,
+                "name": text.split("\n")[0],
+                "image": image or "",
                 "url": (
                     href
                     if href.startswith("http")

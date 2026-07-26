@@ -7,9 +7,9 @@ import html
 CREDLY_USER_ID = "f8a71d67-993f-4767-83f8-5ed1861371a7"
 
 API_URL = (
-    f"https://www.credly.com/api/v1/users/"
-    f"{CREDLY_USER_ID}/external_badges/open_badges/public"
-    "?page=1&page_size=48"
+    f"https://www.credly.com/users/"
+    f"{CREDLY_USER_ID}/badges.json"
+    "?api=api&page=1&page_size=48"
 )
 
 README = Path("README.md")
@@ -34,16 +34,46 @@ def get_badges():
 
     data = response.json()
 
-    print("Response type:", type(data))
+    print("Top-level keys:", data.keys())
 
-    if isinstance(data, dict):
-        print("Top-level keys:")
-        print(data.keys())
+    badges = []
 
-    print("First 2000 characters:")
-    print(str(data)[:2000])
+    for badge in data.get("data", []):
 
-    return []
+        name = (
+            badge.get("name")
+            or badge.get("badge_name")
+            or "Certification"
+        )
+
+        image = (
+            badge.get("image_url")
+            or badge.get("image")
+        )
+
+        url = (
+            badge.get("url")
+            or badge.get("badge_url")
+            or ""
+        )
+
+        issuer = (
+            badge.get("issuer", {})
+            .get("name", "")
+            if isinstance(badge.get("issuer"), dict)
+            else ""
+        )
+
+        badges.append({
+            "name": name,
+            "issuer": issuer,
+            "image": image,
+            "url": url
+        })
+
+    print(f"Found {len(badges)} badges")
+
+    return badges
 
 
 def create_badge_grid(badges):

@@ -13,9 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: pemtajo/badge-readme@main
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          CREDLY_USER: agnieszka-pasieka
-          NUMBER_LAST_BADGES: 200
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Update badges
+        run: |
+          python scripts/update_credly.py
+
+      - name: Commit changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add README.md
+          git diff --cached --quiet || git commit -m "Update Credly badges"
+          git push

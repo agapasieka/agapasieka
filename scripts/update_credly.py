@@ -34,7 +34,10 @@ def get_badges():
 
     data = response.json()
 
-    print("Top-level keys:", data.keys())
+    print("TOP KEYS:", data.keys())
+
+    print("FIRST BADGE:")
+    print(data["data"][0])
 
     badges = []
 

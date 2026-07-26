@@ -20,15 +20,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          
-      - name: Upload Credly debug
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: credly-debug
-          path: |
-            credly-page.html
-            credly-page.png
+    
       - name: Install dependencies
         run: |
           pip install playwright
@@ -37,7 +29,17 @@ jobs:
       - name: Update badges
         run: |
           python scripts/update_credly.py
-
+          
+      - name: Upload Credly debug
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: credly-debug
+          path: |
+            ./credly-page.html
+            ./credly-page.png
+          if-no-files-found: warn
+          
       - name: Commit changes
         run: |
           git config user.name github-actions

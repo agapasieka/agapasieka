@@ -29,10 +29,29 @@ def extract_badges():
 
         print("Opening Credly...")
         page.goto(
+        api_responses = []
+
+        def handle_response(response):
+            url = response.url
+
+            if "api" in url.lower() or "badge" in url.lower():
+                api_responses.append(url)
+                print("POSSIBLE API:", url)
+
+        page.on("response", handle_response)
+
+        page.goto(
             CREDLY_URL,
             wait_until="domcontentloaded",
             timeout=60000
         )
+
+        page.wait_for_timeout(15000)
+
+        print("API candidates:")
+        for url in api_responses:
+            print(url)
+        
 
         page.wait_for_timeout(10000)
 

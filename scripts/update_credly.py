@@ -76,35 +76,40 @@ def extract_badges():
             card = cards.nth(i)
         
             href = card.get_attribute("href")
-        
-            if not href:
-                continue
-        
-            if "/badges/" not in href:
-                continue
-        
-            # Try to find image anywhere inside the badge link
-            img = card.locator("img").first
-        
-            image = None
-            if img.count() > 0:
-                image = img.get_attribute("src")
-        
-            # Try to extract visible text
             text = card.inner_text().strip()
+
+            print("----")
+            print("HREF:", href)
+            print("TEXT:", text[:200])
+                
+            # if not href:
+            #     continue
         
-            if not text:
-                text = "Certification"
+            # if "/badges/" not in href:
+            #     continue
         
-            badges.append({
-                "name": text.split("\n")[0],
-                "image": image or "",
-                "url": (
-                    href
-                    if href.startswith("http")
-                    else "https://www.credly.com" + href
-                )
-            })
+            # # Try to find image anywhere inside the badge link
+            # img = card.locator("img").first
+        
+            # image = None
+            # if img.count() > 0:
+            #     image = img.get_attribute("src")
+        
+            # # Try to extract visible text
+            # text = card.inner_text().strip()
+        
+            # if not text:
+            #     text = "Certification"
+        
+            # badges.append({
+            #     "name": text.split("\n")[0],
+            #     "image": image or "",
+            #     "url": (
+            #         href
+            #         if href.startswith("http")
+            #         else "https://www.credly.com" + href
+            #     )
+            # })
 
         browser.close()
 

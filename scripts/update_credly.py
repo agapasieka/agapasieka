@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 
-CREDLY_URL = "https://www.credly.com/users/agnieszka-pasieka/badges/credly""
+CREDLY_URL = "https://www.credly.com/users/agnieszka-pasieka/badges/credly"
 
 README = Path("README.md")
 

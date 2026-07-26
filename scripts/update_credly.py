@@ -33,7 +33,13 @@ def get_badges():
     response.raise_for_status()
 
     data = response.json()
+    print("TOP KEYS:", data.keys())
 
+    print("NUMBER OF BADGES:", len(data.get("data", [])))
+    
+    if data.get("data"):
+        print("FIRST BADGE OBJECT:")
+        print(data["data"][0])
     print("TOP KEYS:", data.keys())
 
     print("FIRST BADGE:")

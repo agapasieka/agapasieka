@@ -34,44 +34,16 @@ def get_badges():
 
     data = response.json()
 
-    badges = []
+    print("Response type:", type(data))
 
-    for badge in data.get("data", []):
+    if isinstance(data, dict):
+        print("Top-level keys:")
+        print(data.keys())
 
-        badge_info = badge.get("badge", badge)
+    print("First 2000 characters:")
+    print(str(data)[:2000])
 
-        name = (
-            badge_info.get("name")
-            or badge.get("name")
-            or "Certification"
-        )
-
-        image = (
-            badge_info.get("image_url")
-            or badge.get("image_url")
-        )
-
-        url = (
-            badge_info.get("url")
-            or badge.get("url")
-            or ""
-        )
-
-        issuer = (
-            badge_info.get("issuer", {})
-            .get("name", "")
-        )
-
-        badges.append({
-            "name": name,
-            "issuer": issuer,
-            "image": image,
-            "url": url
-        })
-
-    print(f"Found {len(badges)} badges")
-
-    return badges
+    return []
 
 
 def create_badge_grid(badges):

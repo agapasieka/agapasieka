@@ -36,6 +36,19 @@ def extract_badges():
 
         page.wait_for_timeout(10000)
 
+        # DEBUG
+        html = page.content()
+        
+        with open("credly-page.html", "w", encoding="utf-8") as f:
+            f.write(html)
+        
+        page.screenshot(
+            path="credly-page.png",
+            full_page=True
+        )
+        
+        print("HTML length:", len(html))
+
         # scroll to trigger lazy loading
         page.mouse.wheel(0, 5000)
         page.wait_for_timeout(5000)

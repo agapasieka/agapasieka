@@ -33,45 +33,39 @@ def get_badges():
     response.raise_for_status()
 
     data = response.json()
-    print("TOP KEYS:", data.keys())
-
-    print("NUMBER OF BADGES:", len(data.get("data", [])))
-    
-    if data.get("data"):
-        print("FIRST BADGE OBJECT:")
-        print(data["data"][0])
-    print("TOP KEYS:", data.keys())
-
-    print("FIRST BADGE:")
-    print(data["data"][0])
 
     badges = []
 
     for badge in data.get("data", []):
 
-        name = (
-            badge.get("name")
-            or badge.get("badge_name")
-            or "Certification"
+        template = badge.get("badge_template", {})
+
+        name = template.get(
+            "name",
+            "Certification"
         )
 
-        image = (
-            badge.get("image_url")
-            or badge.get("image")
+        image = template.get(
+            "image_url",
+            badge.get("image_url", "")
         )
 
         url = (
-            badge.get("url")
-            or badge.get("badge_url")
-            or ""
+            "https://www.credly.com/badges/"
+            + badge["id"]
         )
 
-        issuer = (
-            badge.get("issuer", {})
-            .get("name", "")
-            if isinstance(badge.get("issuer"), dict)
-            else ""
-        )
+        issuer = ""
+
+        try:
+            issuer = (
+                badge["issuer"]
+                ["entities"][0]
+                ["entity"]
+                ["name"]
+            )
+        except Exception:
+            pass
 
         badges.append({
             "name": name,
@@ -80,7 +74,16 @@ def get_badges():
             "url": url
         })
 
-    print(f"Found {len(badges)} badges")
+        print(
+            "BADGE:",
+            name,
+            "|",
+            image
+        )
+
+    print(
+        f"Found {len(badges)} badges"
+    )
 
     return badges
 

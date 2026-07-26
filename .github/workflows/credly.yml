@@ -14,13 +14,21 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
+          
+      - name: Upload Credly debug
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: credly-debug
+          path: |
+            credly-page.html
+            credly-page.png
       - name: Install dependencies
         run: |
           pip install playwright

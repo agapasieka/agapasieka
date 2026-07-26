@@ -36,30 +36,47 @@ def extract_badges():
 
         page.wait_for_timeout(10000)
 
-        print("Scanning images...")
+        # scroll to trigger lazy loading
+        page.mouse.wheel(0, 5000)
+        page.wait_for_timeout(5000)
 
-        images = page.locator("img")
+        print("Looking for badge cards...")
 
-        for i in range(images.count()):
-            img = images.nth(i)
+        cards = page.locator("a[href*='/badges/']")
 
-            src = img.get_attribute("src")
-            alt = img.get_attribute("alt")
+        print(f"Found {cards.count()} possible badge links")
 
-            if not src:
+        for i in range(cards.count()):
+
+            card = cards.nth(i)
+
+            href = card.get_attribute("href")
+
+            if not href:
                 continue
 
-            if "credly" in src.lower() or "badge" in src.lower():
+            img = card.locator("img").first
 
-                parent = img.locator("xpath=..")
+            if img.count() == 0:
+                continue
 
-                link = parent.get_attribute("href")
+            image = img.get_attribute("src")
 
-                badges.append({
-                    "name": alt or "Certification",
-                    "image": src,
-                    "url": link or CREDLY_URL
-                })
+            title = (
+                img.get_attribute("alt")
+                or card.inner_text()
+                or "Certification"
+            )
+
+            badges.append({
+                "name": title.strip(),
+                "image": image,
+                "url": (
+                    href
+                    if href.startswith("http")
+                    else "https://www.credly.com" + href
+                )
+            })
 
         browser.close()
 

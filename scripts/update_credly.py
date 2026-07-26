@@ -85,34 +85,38 @@ def create_badge_grid(badges):
 
     for badge in badges:
 
+        image = badge.get("image") or badge.get("image_url")
+        name = badge.get("name", "Certification")
+        issuer = badge.get("issuer", "")
+        url = badge.get("url", "#")
+
         cards.append(f"""
 <div style="
 display:inline-block;
+vertical-align:top;
 width:30%;
 min-width:220px;
 margin:10px;
 padding:15px;
 text-align:center;
-border-radius:10px;
 ">
 
-<a href="{badge['url']}">
+<a href="{url}">
 
 <img 
-src="{badge['image']}"
+src="{image}"
 width="120"
-alt="{html.escape(badge['name'])}"
+height="120"
+alt="{name}"
 >
 
 <br>
 
-<b>{html.escape(badge['name'])}</b>
+<strong>{name}</strong>
 
 <br>
 
-<small>
-{html.escape(badge['issuer'])}
-</small>
+<small>{issuer}</small>
 
 </a>
 

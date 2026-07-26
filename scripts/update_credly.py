@@ -11,11 +11,12 @@ START = "<!--START_SECTION:badges-->"
 END = "<!--END_SECTION:badges-->"
 
 
-def extract_badges():
+def inspect_credly():
 
-    badges = []
+    api_responses = []
 
     with sync_playwright() as p:
+
         browser = p.chromium.launch(
             headless=True,
             args=[
@@ -24,21 +25,27 @@ def extract_badges():
         )
 
         page = browser.new_page(
-            viewport={"width": 1400, "height": 2000}
+            viewport={
+                "width": 1400,
+                "height": 3000
+            }
         )
-
-        print("Opening Credly...")
-        page.goto(
-        api_responses = []
 
         def handle_response(response):
             url = response.url
 
-            if "api" in url.lower() or "badge" in url.lower():
+            if (
+                "api" in url.lower()
+                or "badge" in url.lower()
+                or "profile" in url.lower()
+                or "graphql" in url.lower()
+            ):
                 api_responses.append(url)
                 print("POSSIBLE API:", url)
 
         page.on("response", handle_response)
+
+        print("Opening Credly...")
 
         page.goto(
             CREDLY_URL,
@@ -46,149 +53,75 @@ def extract_badges():
             timeout=60000
         )
 
+        print("Waiting for JavaScript...")
+
         page.wait_for_timeout(15000)
-
-        print("API candidates:")
-        for url in api_responses:
-            print(url)
-        
-
-        page.wait_for_timeout(10000)
 
         print("Saving debug files...")
 
-        with open("credly-page.html", "w", encoding="utf-8") as f:
+        with open(
+            "credly-page.html",
+            "w",
+            encoding="utf-8"
+        ) as f:
             f.write(page.content())
-        
+
         page.screenshot(
             path="credly-page.png",
             full_page=True
         )
-        
-        print("Debug files saved")
 
-        # DEBUG
-        html = page.content()
-        
-        with open("credly-page.html", "w", encoding="utf-8") as f:
-            f.write(html)
-        
-        page.screenshot(
-            path="credly-page.png",
-            full_page=True
+        print(
+            "HTML length:",
+            len(page.content())
         )
-        
-        print("HTML length:", len(html))
 
-        # scroll to trigger lazy loading
-        page.mouse.wheel(0, 5000)
-        page.wait_for_timeout(5000)
+        print("\nVisible page text:")
+        print(
+            page.locator("body")
+            .inner_text()[:2000]
+        )
 
-        print("Looking for badge cards...")
+        print("\nAPI candidates:")
 
-        cards = page.locator("a")
+        for url in api_responses:
+            print(url)
 
-        print(f"Found {cards.count()} possible badge links")
-
-        for i in range(cards.count()):
-
-            card = cards.nth(i)
-        
-            href = card.get_attribute("href")
-            text = card.inner_text().strip()
-
-            print("----")
-            print("HREF:", href)
-            print("TEXT:", text[:200])
-                
-            # if not href:
-            #     continue
-        
-            # if "/badges/" not in href:
-            #     continue
-        
-            # # Try to find image anywhere inside the badge link
-            # img = card.locator("img").first
-        
-            # image = None
-            # if img.count() > 0:
-            #     image = img.get_attribute("src")
-        
-            # # Try to extract visible text
-            # text = card.inner_text().strip()
-        
-            # if not text:
-            #     text = "Certification"
-        
-            # badges.append({
-            #     "name": text.split("\n")[0],
-            #     "image": image or "",
-            #     "url": (
-            #         href
-            #         if href.startswith("http")
-            #         else "https://www.credly.com" + href
-            #     )
-            # })
+        print(
+            "\nTotal possible API calls:",
+            len(api_responses)
+        )
 
         browser.close()
 
-    # remove duplicates
-    unique = {}
 
-    for badge in badges:
-        unique[badge["image"]] = badge
+def update_readme_placeholder():
 
-    return list(unique.values())
+    if not README.exists():
+        print("README not found")
+        return
 
-
-def build_html(badges):
-
-    if not badges:
-        return "<p>No badges found.</p>"
-
-    rows = []
-
-    rows.append(
-        '<table><tr>'
+    text = README.read_text(
+        encoding="utf-8"
     )
 
-    for index, badge in enumerate(badges):
+    # Do not overwrite existing badges yet.
+    if START not in text or END not in text:
+        print("Badge markers not found")
+        return
 
-        if index > 0 and index % 3 == 0:
-            rows.append("</tr><tr>")
-
-        rows.append(f"""
-<td align="center" width="33%">
-
-<a href="{badge['url']}">
-<img src="{badge['image']}" width="120"><br>
-<b>{badge['name']}</b>
-</a>
-
-</td>
-""")
-
-    rows.append("</tr></table>")
-
-    return "\n".join(rows)
-
-
-def update_readme(html):
-
-    text = README.read_text()
+    replacement = (
+        START
+        + "\n\n"
+        + "Badge scraper diagnostics running..."
+        + "\n\n"
+        + END
+    )
 
     pattern = (
         re.escape(START)
         + ".*?"
         + re.escape(END)
-    )
-
-    replacement = (
-        START
-        + "\n\n"
-        + html
-        + "\n\n"
-        + END
     )
 
     new_text = re.sub(
@@ -198,17 +131,17 @@ def update_readme(html):
         flags=re.DOTALL
     )
 
-    README.write_text(new_text)
+    README.write_text(
+        new_text,
+        encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":
 
-    badges = extract_badges()
+    inspect_credly()
 
-    print(f"Found {len(badges)} badges")
+    # Temporarily disabled:
+    # update_readme_placeholder()
 
-    html = build_html(badges)
-
-    update_readme(html)
-
-    print("README updated")
+    print("Finished")

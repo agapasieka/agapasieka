@@ -16,7 +16,12 @@ def extract_badges():
     badges = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled"
+            ]
+        )
 
         page = browser.new_page(
             viewport={"width": 1400, "height": 2000}
@@ -25,11 +30,11 @@ def extract_badges():
         print("Opening Credly...")
         page.goto(
             CREDLY_URL,
-            wait_until="networkidle",
+            wait_until="domcontentloaded",
             timeout=60000
         )
 
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(10000)
 
         print("Scanning images...")
 

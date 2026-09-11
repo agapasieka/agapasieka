@@ -2,6 +2,7 @@ import requests
 from pathlib import Path
 import re
 import html
+from datetime import datetime, timezone
 
 
 CREDLY_USER_ID = "f8a71d67-993f-4767-83f8-5ed1861371a7"
@@ -81,16 +82,25 @@ def get_badges():
             except Exception:
                 pass
 
+            issued_at = (
+                badge.get("issued_at")
+                or badge.get("created_at")
+                or ""
+            )
+
             badges.append({
                 "name": name,
                 "issuer": issuer,
                 "image": image,
-                "url": url
+                "url": url,
+                "issued_at": issued_at
             })
 
             print(
                 "BADGE:",
                 name,
+                "|",
+                issued_at,
                 "|",
                 image
             )
@@ -104,7 +114,22 @@ def get_badges():
         f"Found {len(badges)} badges"
     )
 
+    badges.sort(
+        key=badge_sort_key,
+        reverse=True
+    )
+
     return badges
+
+
+def badge_sort_key(badge):
+
+    raw = badge.get("issued_at", "")
+
+    try:
+        return datetime.fromisoformat(raw)
+    except (ValueError, TypeError):
+        return datetime.min.replace(tzinfo=timezone.utc)
 
 
 def create_badge_grid(badges):

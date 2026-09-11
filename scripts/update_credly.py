@@ -9,8 +9,9 @@ CREDLY_USER_ID = "f8a71d67-993f-4767-83f8-5ed1861371a7"
 API_URL = (
     f"https://www.credly.com/users/"
     f"{CREDLY_USER_ID}/badges.json"
-    "?api=api&page=1&page_size=48"
 )
+
+PAGE_SIZE = 48
 
 README = Path("README.md")
 
@@ -22,64 +23,82 @@ def get_badges():
 
     print("Fetching Credly badges...")
 
-    response = requests.get(
-        API_URL,
-        headers={
-            "User-Agent": "Mozilla/5.0"
-        },
-        timeout=30
-    )
-
-    response.raise_for_status()
-
-    data = response.json()
-
     badges = []
+    page = 1
 
-    for badge in data.get("data", []):
+    while True:
 
-        template = badge.get("badge_template", {})
-
-        name = template.get(
-            "name",
-            "Certification"
+        response = requests.get(
+            API_URL,
+            params={
+                "api": "api",
+                "page": page,
+                "page_size": PAGE_SIZE
+            },
+            headers={
+                "User-Agent": "Mozilla/5.0"
+            },
+            timeout=30
         )
 
-        image = template.get(
-            "image_url",
-            badge.get("image_url", "")
-        )
+        response.raise_for_status()
 
-        url = (
-            "https://www.credly.com/badges/"
-            + badge["id"]
-        )
+        data = response.json()
 
-        issuer = ""
+        page_badges = data.get("data", [])
 
-        try:
-            issuer = (
-                badge["issuer"]
-                ["entities"][0]
-                ["entity"]
-                ["name"]
+        if not page_badges:
+            break
+
+        for badge in page_badges:
+
+            template = badge.get("badge_template", {})
+
+            name = template.get(
+                "name",
+                "Certification"
             )
-        except Exception:
-            pass
 
-        badges.append({
-            "name": name,
-            "issuer": issuer,
-            "image": image,
-            "url": url
-        })
+            image = template.get(
+                "image_url",
+                badge.get("image_url", "")
+            )
 
-        print(
-            "BADGE:",
-            name,
-            "|",
-            image
-        )
+            url = (
+                "https://www.credly.com/badges/"
+                + badge["id"]
+            )
+
+            issuer = ""
+
+            try:
+                issuer = (
+                    badge["issuer"]
+                    ["entities"][0]
+                    ["entity"]
+                    ["name"]
+                )
+            except Exception:
+                pass
+
+            badges.append({
+                "name": name,
+                "issuer": issuer,
+                "image": image,
+                "url": url
+            })
+
+            print(
+                "BADGE:",
+                name,
+                "|",
+                image
+            )
+
+        if len(page_badges) < PAGE_SIZE:
+            break
+
+        page += 1
 
     print(
         f"Found {len(badges)} badges"

@@ -1,6 +1,6 @@
 ## Hi there 👋 I'm Agi
 
-Platform Engineer 
+Platform Engineer who automates the boring bits so there’s more time for the interesting bits (and the pets 🐾). I mostly live in Terraform, Kubernetes and GCP, and I build the guardrails that let teams ship fast without setting prod on fire — I once built a bot that reads your `terraform plan` so you don’t have to.
 
 ## 🏆 Certifications
 
